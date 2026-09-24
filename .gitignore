@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.egg-info/
+
+# dbt
+dbt_project/target/
+dbt_project/dbt_packages/
+dbt_project/logs/
+*.log
+
+# Secrets / credentials
+.env
+*.env
+profiles.yml
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
