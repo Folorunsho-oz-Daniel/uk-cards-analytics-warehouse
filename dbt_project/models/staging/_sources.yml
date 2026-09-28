@@ -1,0 +1,19 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Raw layer — source data exactly as received, no transformations."
+    database: UK_CARDS_ANALYTICS
+    schema: RAW
+    tables:
+      - name: customers
+        description: "One row per customer application/onboarding record."
+      - name: accounts
+        description: "One row per credit card account, linked to a customer."
+      - name: transactions
+        description: "Card transactions (purchases, cash withdrawals, refunds)."
+      - name: repayments
+        description: "Monthly repayment history per account."
+      - name: credit_decisions
+        description: "Lending decision outcomes — both approved and declined applicants."
+        
