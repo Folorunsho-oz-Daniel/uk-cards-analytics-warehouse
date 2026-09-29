@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: "Cleaned, standardized customer records."
+    columns:
+      - name: customer_id
+        description: "Unique identifier for a customer."
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_accounts
+    description: "Cleaned, standardized account records, one per customer."
+    columns:
+      - name: account_id
+        description: "Unique identifier for an account."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Links back to the customer who owns this account."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: account_status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Active', 'Closed', 'Defaulted']
+      - name: product_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Standard', 'Rewards', 'Low-Rate', 'Balance Transfer', 'Student']
+
+  - name: stg_transactions
+    description: "Cleaned, standardized card transactions."
+    columns:
+      - name: transaction_id
+        tests:
+          - unique
+          - not_null
+      - name: account_id
+        description: "Links back to the account this transaction belongs to."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_id
+      - name: transaction_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Purchase', 'Cash Withdrawal', 'Refund']
+
+  - name: stg_repayments
+    description: "Cleaned, standardized monthly repayment history."
+    columns:
+      - name: repayment_id
+        tests:
+          - unique
+          - not_null
+      - name: account_id
+        description: "Links back to the account this repayment belongs to."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_id
+      - name: repayment_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Full Payment', 'Minimum Payment', 'Partial Payment', 'Missed Payment']
+
+  - name: stg_credit_decisions
+    description: "Cleaned lending decisions, covering both approved and declined applicants."
+    columns:
+      - name: decision_id
+        tests:
+          - unique
+          - not_null
+      - name: decision_outcome
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Approved', 'Declined']
