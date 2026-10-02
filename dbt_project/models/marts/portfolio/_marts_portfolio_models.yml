@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: fct_portfolio_performance
+    description: >
+      Portfolio performance mart: one row per account, combining
+      balance, utilisation, delinquency status, and customer risk
+      profile. This is the primary table for portfolio-level
+      reporting and risk-band analysis.
+    columns:
+      - name: account_id
+        description: "Unique identifier for the account."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+      - name: risk_band
+        description: "Credit risk grouping, A (best) to E (worst), derived from credit score."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['A - Excellent', 'B - Good', 'C - Fair', 'D - Poor', 'E - Very Poor']
+      - name: account_status
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Active', 'Closed', 'Defaulted']
+      - name: delinquency_status
+        description: "Current delinquency severity based on the 3 most recent repayments."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Current', '30+ Days Delinquent', '60+ Days Delinquent', '90+ Days Delinquent']

@@ -1,8 +1,15 @@
 -- Combines account details with transaction and repayment summaries
 -- to calculate a simplified current balance and credit utilisation.
 --
--- NOTE: this is a simplified estimate (net spend minus repayments),
--- not a full accounting ledger with interest/fees applied.
+-- KNOWN LIMITATION: current_balance_gbp can be negative for some
+-- accounts. This happens because transactions and repayments were
+-- generated independently as synthetic data, with no real link
+-- between "how much someone spent" and "how much they paid back" —
+-- so some accounts end up repaying more than they spent over the
+-- 12-month window. In a real system this wouldn't happen (you can't
+-- genuinely "overpay" a credit card into negative territory in the
+-- same way). Left unadjusted here deliberately, rather than papering
+-- over it with an artificial floor — see README for full discussion.
 
 with accounts as (
 
