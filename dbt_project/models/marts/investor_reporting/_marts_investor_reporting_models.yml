@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: fct_monthly_portfolio_summary
+    description: >
+      Investor-reporting mart: a point-in-time portfolio snapshot,
+      aggregated by risk band and account status. Intended to be
+      rebuilt on a schedule (daily/monthly) in a production setting
+      to build up a true historical time series.
+    columns:
+      - name: report_date
+        tests:
+          - not_null
+      - name: risk_band
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['A - Excellent', 'B - Good', 'C - Fair', 'D - Poor', 'E - Very Poor']
+      - name: account_status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Active', 'Closed', 'Defaulted']
+      - name: account_count
+        description: "Number of accounts in this risk band / status combination."
+        tests:
+          - not_null
