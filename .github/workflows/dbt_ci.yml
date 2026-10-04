@@ -1,0 +1,57 @@
+name: dbt CI
+
+# Runs automatically whenever code is pushed to main, or when a
+# pull request targeting main is opened. This is what lets us catch
+# broken models or failing tests BEFORE they're considered "done."
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  dbt-run-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create dbt profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << EOF
+          dbt_project:
+            target: ci
+            outputs:
+              ci:
+                type: snowflake
+                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+                user: ${{ secrets.SNOWFLAKE_USER }}
+                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+                role: ${{ secrets.SNOWFLAKE_ROLE }}
+                database: ${{ secrets.SNOWFLAKE_DATABASE }}
+                warehouse: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+                schema: DBT_CI
+                threads: 4
+          EOF
+
+      - name: Verify dbt can connect
+        working-directory: dbt_project
+        run: dbt debug
+
+      - name: Build all models
+        working-directory: dbt_project
+        run: dbt run
+
+      - name: Run all tests
+        working-directory: dbt_project
+        run: dbt test
