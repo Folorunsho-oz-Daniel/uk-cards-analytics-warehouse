@@ -84,28 +84,41 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-1. Generate the data, in this order:
+**Step 1: generate the data** (run in this order)
+
 ```bash
-   python data_generation/generate_customers.py
-   python data_generation/generate_accounts.py
-   python data_generation/generate_transactions.py
-   python data_generation/generate_repayments.py
-   python data_generation/generate_credit_decisions.py
-```
-2. In Snowflake, run the scripts in `warehouse_setup/`: `01` and `02` create the warehouse, database and raw tables. `03` is an optional row-count check. `04` is cost housekeeping specific to the original account, so edit the names in it or skip it.
-3. Load the CSVs into the `RAW` tables. Set the connection settings as environment variables (`SNOWFLAKE_ACCOUNT`, `SNOWFLAKE_USER`, `SNOWFLAKE_ROLE`, `SNOWFLAKE_WAREHOUSE`, `SNOWFLAKE_DATABASE`), then run:
-```bash
-   python ingestion/load_raw_tables.py
-```
-   The script asks for your password at a hidden prompt, reloads each table, and checks every row count against its CSV.
-4. Create your own dbt `profiles.yml` (profile name `dbt_project`) pointing at your Snowflake account. This file is deliberately not in the repo.
-5. From inside `dbt_project/`:
-```bash
-   dbt run
-   dbt test
-   dbt docs generate && dbt docs serve
+python data_generation/generate_customers.py
+python data_generation/generate_accounts.py
+python data_generation/generate_transactions.py
+python data_generation/generate_repayments.py
+python data_generation/generate_credit_decisions.py
 ```
 
+**Step 2: create the Snowflake objects**
+
+In Snowflake, run the scripts in `warehouse_setup/`: `01` and `02` create the warehouse, database and raw tables. `03` is an optional row-count check. `04` is cost housekeeping specific to the original account, so edit the names in it or skip it.
+
+**Step 3: load the CSVs into the `RAW` tables**
+
+Set the connection settings as environment variables (`SNOWFLAKE_ACCOUNT`, `SNOWFLAKE_USER`, `SNOWFLAKE_ROLE`, `SNOWFLAKE_WAREHOUSE`, `SNOWFLAKE_DATABASE`), then run:
+
+```bash
+python ingestion/load_raw_tables.py
+```
+
+The script asks for your password at a hidden prompt, reloads each table, and checks every row count against its CSV.
+
+**Step 4: configure dbt**
+
+Create your own dbt `profiles.yml` (profile name `dbt_project`) pointing at your Snowflake account. This file is deliberately not in the repo.
+
+**Step 5: build and test**, from inside `dbt_project/`:
+
+```bash
+dbt run
+dbt test
+dbt docs generate && dbt docs serve
+```
 ## Known limitations
 
 - **Negative account balances**: `current_balance_gbp` can be negative for some accounts. Transactions and repayments were generated as two independent synthetic datasets, so some accounts repay more than they spend. This is left visible rather than floored at zero, because flooring would hide the underlying data-generation choice. A production system would derive balance from a single authoritative ledger.
